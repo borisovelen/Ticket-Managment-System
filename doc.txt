@@ -1,0 +1,2 @@
+start server by: npm run dev
+start react by: npm start

@@ -1,0 +1,8 @@
+.main{
+    margin: 0;
+    padding: 0;
+    display:flex;
+    min-height: 70vh;
+    flex-wrap: nowrap;
+    flex-direction: row;
+}

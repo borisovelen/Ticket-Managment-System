@@ -1,0 +1,30 @@
+:root{
+    /* --primary-color:linear-gradient(to right, #2c3e50, #4ca1af); */
+    --color-scheme:light;
+    --primary-color: linear-gradient(to right, #5c258d, #4389a2);
+    --primary-color-one:#5c258d;
+    --primary-color-two:#4389a2;
+    --table-row:#f5f5f5;
+    --table-row-hover:#ddd;
+    --secondary-color:white;
+    --text-color:black;
+    --background-color:white;
+    --secondary-color-active:#2c3e50;
+    --side-panel-color: linear-gradient(to right, #4b689b, #4389a2);
+    --third-color: #012677;
+    transition:all 0.3s;
+}
+
+[theme="dark"] {
+    --color-scheme:dark;
+    --text-color:white;
+    --background-color:#232526;
+    --primary-color:linear-gradient(to right, #232526, #414345);
+    --primary-color-one:#232526;
+    --primary-color-two:#414345;
+    --table-row:var(--primary-color-two);
+    --table-row-hover:#2a2d2e;
+    --side-panel-color: linear-gradient(to right, #383a3b, #414345);
+    --secondary-color-active:#232526;
+    transition:all 0.3s;
+}

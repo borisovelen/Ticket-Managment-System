@@ -1,0 +1,63 @@
+@import "../../properties.css";
+
+.ticket-details {
+    margin-top: 5vh;
+    padding: 0 1vw;
+    max-height: 65vh;
+    position: sticky;
+    top:15vh;
+}
+
+#ticket-title {
+    line-height: 1;
+    padding-bottom: 10px;
+    border-bottom: 5px solid white;
+    margin-block-end: 0;
+    margin-bottom: 10px;
+}
+.sections h4{
+    margin-block-end:0;
+    padding-bottom: 5px;
+}
+.user-info {
+    display: block;
+    line-height: 1;
+    font-size: 0.7rem;
+    margin-bottom:10px;
+}
+
+.user-info p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+.user-info span {
+    font-weight: bold;
+}
+.ticket-details p{
+    margin-block-start: 0;
+}
+
+#description-text-box {
+    /* border-top:2px solid rgba(0, 0, 0, 0.2); */
+    padding: 10px;
+    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2);
+    /* border-bottom:2px solid rgba(0, 0, 0, 0.2); */
+    overflow-y: auto;
+    max-height: 50vh;
+}
+
+#description-text-box::-webkit-scrollbar {
+    width: 12px;
+    /* width of the entire scrollbar */
+}
+
+#description-text-box::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+    /* color of the tracking area */
+}
+
+#description-text-box::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color-one);
+
+}

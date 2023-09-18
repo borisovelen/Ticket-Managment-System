@@ -1,0 +1,18 @@
+.notification{
+    z-index: 99999999999999;
+    padding:10px 20px;
+    position:fixed;
+    color:white;
+    bottom:20px;
+    right:20px;
+    /* background:linear-gradient(to right, #ed213a, #93291e); */
+    background-color: rgba(247, 37, 37, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    border-radius:20px;
+}
+.notification_success{
+    /* background:linear-gradient(to right, #1cd8d2, #93edc7);; */
+    background-color: rgba(127, 255, 212, 0.8);
+    color:black;
+}

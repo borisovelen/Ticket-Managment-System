@@ -1,0 +1,75 @@
+#ticketsTable{
+    font-family: Arial, Helvetica, sans-serif;
+    display: block;
+    margin:5vh 0 10vh 0;
+    overflow-y:auto;
+    max-height: 45vh;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+}
+#ticketsTable table{
+    border-collapse: collapse;
+}
+#ticketsTable thead{
+    position: sticky;
+    top: 0;
+}
+#ticketsTable td,
+#ticketsTable th {
+    padding: 20px 20px;
+    text-align: center;
+    text-wrap:wrap;
+}
+.deleting > td {
+    visibility: hidden;
+    height: 0;
+    font-size: 0;
+    color: transparent;
+    transition: all 0.5s;
+}
+#ticketsTable tr:nth-child(even) {
+    background-color: var(--table-row);
+}
+
+#ticketsTable tr:hover {
+    background-color: var(--table-row-hover);
+}
+#ticketsTable th {
+    text-align: left;
+    background-color: none;
+    color: white;
+    text-align: center;
+}
+/* #ticketsTable td{
+    inline-size: 1px;
+    overflow-wrap: break-word;
+    hyphens: manual;
+} */
+#ticketsTable thead tr:first-child{
+    background: var(--primary-color); 
+}
+.optionButton{
+    margin: 0 5px;
+    cursor: pointer;    
+}
+
+.priority{
+    margin: 0;
+    padding:5px 10px;
+    border-radius: 50px;
+}
+.priority_Critical{
+    background: linear-gradient(to right, #cb2d3e, #ef473a);
+    color:white;
+}
+.priority_High{
+    background: linear-gradient(to right, #ef473a, #ffaa00);
+    color:white;
+}
+.priority_Moderate{
+    background:linear-gradient(to right, #ffaa00, #ffff00);
+    color:white;
+}
+.priority_Low{
+    background:linear-gradient(to left, #b8e35b, #45b649);
+    color:white;
+}

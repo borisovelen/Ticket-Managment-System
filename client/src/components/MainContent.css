@@ -1,0 +1,10 @@
+@import "../properties.css";
+
+.mainContent{
+    width: 100%;
+    background-color: var(--background-color);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

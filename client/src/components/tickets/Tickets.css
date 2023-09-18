@@ -1,0 +1,65 @@
+@import '../../properties.css';
+
+.ticketsPage{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.table-filter{
+    margin:10vh 0 0 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+.table-filter input, .table-filter select{
+    margin:0 5px;
+    border: none;
+    background-color: var(--background-color);
+    border-bottom: 5px solid var(--primary-color-two);
+    color: var(--text-color);
+    outline: none;
+    text-align: center;
+    width: 100%!important;
+    padding:10px 10px;
+    width:12vw;
+}
+.table-filter input[type="date"]{
+    color-scheme: var(--color-scheme);
+}
+.table-filter button{
+    background-color: var(--primary-color-two);
+    color: white;
+    border: none;
+    text-wrap: nowrap;
+    cursor: pointer;
+    margin-left:5px;
+}
+.table-filter input::placeholder{
+    color: var(--text-color);
+}
+.table-filter input:focus::placeholder {
+    color: transparent;
+  }
+.table-filter select {
+    outline: 0;
+    width: 100%;
+    appearance:none;
+    cursor: pointer;
+
+    &:focus {
+        outline: none;
+    }
+    &::-ms-expand {
+        display: none;
+    }
+}
+.table-filter select option {
+    color: white!important;
+    background-color: var(--secondary-color-active)!important;
+}
+.table-filter select:disabled{
+    opacity: 0.2;
+}
