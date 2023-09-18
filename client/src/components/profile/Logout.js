@@ -5,7 +5,7 @@ import { useErrorContext } from '../../context/ErrorContext';
 import { useSelectedTicketContext } from '../../context/selectedTicketContext';
 import { useTicketCounterContext } from '../../context/TicketCounterContext';
 
-function Logout(){
+function Logout() {
     const { setLoginStatus } = useLoginContext();
     const { setCounter } = useTicketCounterContext();
     const { setSelectedTicket } = useSelectedTicketContext();
@@ -17,7 +17,7 @@ function Logout(){
                 setSelectedTicket("");
                 setLoginStatus(false);
                 setError([response.data, "success"]);
-                setCounter({ counter: 0, noMore: false });
+                setCounter({ noMore: false, limit: 5, offset: 0, orderType: "ASC", orderBy: "id", update: 0 });
             } else setError(["There was error on logout!", "error"])
         }).catch((err) => {
             if (err.response.status === 500) {
@@ -28,7 +28,7 @@ function Logout(){
         });
     }
 
-    return(
+    return (
         <button className='userButton' type='button' onClick={logoutHandler}>Logout</button>
     )
 }
