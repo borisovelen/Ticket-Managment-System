@@ -6,7 +6,7 @@ import Login from './components/profile/Login';
 import Notification from './components/Notification';
 import Footer from './components/Footer';
 import UserAuth from './components/profile/UserAuth';
-import ProfilePage from './components/profile/ProfilePage'
+import ProfilePage from './components/profile/ProfilePage';
 import { LoginProvider } from './context/LoginContext';
 import { UserProvider } from './context/UserContext';
 import { ErrorProvider } from './context/ErrorContext';
