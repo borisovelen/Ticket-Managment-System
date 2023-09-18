@@ -54,7 +54,6 @@ export default function Tickets() {
     },[counter.limit,counter.offset,counter.orderBy,counter.orderType, counter.update,loginStatus]);
     useEffect(()=>{
         if(typeof tickets!=="string"&&tickets.length%5!==0){
-            console.log(tickets);
             setCounter(prev=>({...prev,noMore:true}));
         }
     },[tickets])
