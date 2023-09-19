@@ -19,7 +19,6 @@ function TicketsTable(props) {
         const tableElement = ref.current;
         if (tableElement) {
             if (tableElement.scrollTop + tableElement.clientHeight >= tableElement.scrollHeight) {
-                console.log("eee");
                 if (!counter.noMore) setCounter(prev => ({ ...prev, offset: prev.offset + 5 }));
             }
         }
