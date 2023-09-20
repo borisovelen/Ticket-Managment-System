@@ -8,10 +8,11 @@ const mysqlConnection = {
     database: process.env.DATABASE_NAME
 }
 
-const connection = mysql.createConnection(mysqlConnection)
-connection.connect((err)=>{
-    if(err) console.log(`Database connection failed: ${err}`);
+const connection = mysql.createConnection(mysqlConnection);
+connection.connect((err) => {
+    if (err) console.log(`Database connection failed: ${err}`);
     else console.log(`Database connection successful!`);
 });
+
 
 exports.dbConnection = connection;

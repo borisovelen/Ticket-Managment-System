@@ -4,10 +4,12 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const MySQLStore = require('express-mysql-session')(session);
+const connection = require("./database").dbConnection;
 
 const usersRouter = require("./routes/users");
+const jiraRouter = require("./routes/jira");
 const ticketsRouter = require("./routes/tickets");
-const connection = require("./database").dbConnection;
+
 
 const PORT = process.env.SERVER_PORT;
 
@@ -29,5 +31,6 @@ app.use(session({
 
 app.use("/", usersRouter);
 app.use("/tickets", ticketsRouter);
+app.use("/jiraIssueChange", jiraRouter);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
