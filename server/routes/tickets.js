@@ -20,55 +20,55 @@ const auth = {
     password: JIRA_API_KEY
 }
 
-async function jiraGetIssues() {
-    const jiraIssuesList = [];
-    const statusMap = new Map([
-        [10010, "New"],
-        [10011, "In Progress"],
-        [10012, "Done"],
-        [10013, "Review"]
-    ]);
-    try {
-        await axios.get(JIRA_API_URL, {
-            auth: auth,
-            headers: {
-                'Content-Tyzpe': 'application/json'
-            }
-        }).then(response => response.data).then(jiraData => {
-            console.log(`Total issues from Jira: ${jiraData.total}`);
-            console.log(`------------------------------------`);
-            jiraData.issues.forEach(issue => {
-                jiraIssuesList.push({
-                    id: issue.id,
-                    createdOn: new Date(issue.fields.created).toISOString().slice(0, 19).replace('T', ' '),
-                    updatedOn: new Date(issue.fields.updated).toISOString().slice(0, 19).replace('T', ' '),
-                    state: statusMap.get(Number(issue.fields.status.id)),
-                    shortDesc: issue.fields.summary,
-                    description: issue.fields.description.content[0].content[0].text
-                })
-            });
-        });
+// async function jiraGetIssues() {
+//     const jiraIssuesList = [];
+//     const statusMap = new Map([
+//         [10010, "New"],
+//         [10011, "In Progress"],
+//         [10012, "Done"],
+//         [10013, "Review"]
+//     ]);
+//     try {
+//         await axios.get(JIRA_API_URL, {
+//             auth: auth,
+//             headers: {
+//                 'Content-Tyzpe': 'application/json'
+//             }
+//         }).then(response => response.data).then(jiraData => {
+//             console.log(`Total issues from Jira: ${jiraData.total}`);
+//             console.log(`------------------------------------`);
+//             jiraData.issues.forEach(issue => {
+//                 jiraIssuesList.push({
+//                     id: issue.id,
+//                     createdOn: new Date(issue.fields.created).toISOString().slice(0, 19).replace('T', ' '),
+//                     updatedOn: new Date(issue.fields.updated).toISOString().slice(0, 19).replace('T', ' '),
+//                     state: statusMap.get(Number(issue.fields.status.id)),
+//                     shortDesc: issue.fields.summary,
+//                     description: issue.fields.description.content[0].content[0].text
+//                 })
+//             });
+//         });
 
-        jiraIssuesList.forEach(jiraIssue => {
-            const jiraInsertQuery = `INSERT INTO ${TICKETS_TABLE_NAME} (jira_id,created_on,updated_on,state,short_desc,description) VALUES (?,?,?,?,?,?);`;
-            const jiraUpdateQuery = `UPDATE ${TICKETS_TABLE_NAME} SET created_on=?, updated_on=?, state=?, short_desc=?, description=? WHERE jira_id=?`;
-            connection.query(jiraInsertQuery, [jiraIssue.id, jiraIssue.createdOn, jiraIssue.updatedOn, jiraIssue.state, jiraIssue.shortDesc, jiraIssue.description], (err, row) => {
-                if (err) {
-                    if (err.code === "ER_DUP_ENTRY") {
-                        console.log("Checking for issue update...");
-                        connection.query(jiraUpdateQuery, [jiraIssue.createdOn, jiraIssue.updatedOn, jiraIssue.state, jiraIssue.shortDesc, jiraIssue.description, jiraIssue.id], (err, row) => {
-                            if (err) throw err;
-                            else console.log("Successfully updated!");
-                        })
-                    } else throw err;
-                } else console.log('Successfully updated databse with jira issue!');
-            })
-        })
-        return "Jira issues loaded successfully!";
-    } catch (err) {
-        return "Error loading jira issues: " + err;
-    }
-}
+//         jiraIssuesList.forEach(jiraIssue => {
+//             const jiraInsertQuery = `INSERT INTO ${TICKETS_TABLE_NAME} (jira_id,created_on,updated_on,state,short_desc,description) VALUES (?,?,?,?,?,?);`;
+//             const jiraUpdateQuery = `UPDATE ${TICKETS_TABLE_NAME} SET created_on=?, updated_on=?, state=?, short_desc=?, description=? WHERE jira_id=?`;
+//             connection.query(jiraInsertQuery, [jiraIssue.id, jiraIssue.createdOn, jiraIssue.updatedOn, jiraIssue.state, jiraIssue.shortDesc, jiraIssue.description], (err, row) => {
+//                 if (err) {
+//                     if (err.code === "ER_DUP_ENTRY") {
+//                         console.log("Checking for issue update...");
+//                         connection.query(jiraUpdateQuery, [jiraIssue.createdOn, jiraIssue.updatedOn, jiraIssue.state, jiraIssue.shortDesc, jiraIssue.description, jiraIssue.id], (err, row) => {
+//                             if (err) throw err;
+//                             else console.log("Successfully updated!");
+//                         })
+//                     } else throw err;
+//                 } else console.log('Successfully updated databse with jira issue!');
+//             })
+//         })
+//         return "Jira issues loaded successfully!";
+//     } catch (err) {
+//         return "Error loading jira issues: " + err;
+//     }
+// }
 
 
 //Tickets logics
@@ -86,7 +86,7 @@ router.get("/", (req, res) => {
         const orderType = (req.query?.orderType && req.query?.orderType !== "undefined") ? req.query.orderType : "";
         const orderBy = (orderType !== "" && req.query?.orderBy !== "undefiend") ? "ORDER BY " + TICKETS_TABLE_NAME + "." + req.query.orderBy : "";
 
-        const query = `SELECT ${TICKETS_TABLE_NAME}.id, ${TICKETS_TABLE_NAME}.short_desc AS shortDesc, ${TICKETS_TABLE_NAME}.description, u1.fullname AS createdBy, ${TICKETS_TABLE_NAME}.created_on AS createdOn, u2.fullname as updatedBy, ${TICKETS_TABLE_NAME}.updated_on AS updatedOn, ${TICKETS_TABLE_NAME}.state, ${TICKETS_TABLE_NAME}.priority FROM ${TICKETS_TABLE_NAME} LEFT JOIN ${USERS_TABLE_NAME} u1 ON u1.id=${TICKETS_TABLE_NAME}.user LEFT JOIN ${USERS_TABLE_NAME} u2 ON u2.id=${TICKETS_TABLE_NAME}.updated_by ${adminCheck} ${orderBy} ${orderType} ${limit} ${offset};`;
+        const query = `SELECT ${TICKETS_TABLE_NAME}.id, ${TICKETS_TABLE_NAME}.short_desc AS shortDesc, ${TICKETS_TABLE_NAME}.description, u1.fullname AS createdBy, ${TICKETS_TABLE_NAME}.created_on AS createdOn, u2.fullname as updatedBy, ${TICKETS_TABLE_NAME}.updated_on AS updatedOn, ${TICKETS_TABLE_NAME}.state, ${TICKETS_TABLE_NAME}.priority, ${TICKETS_TABLE_NAME}.jira_id FROM ${TICKETS_TABLE_NAME} LEFT JOIN ${USERS_TABLE_NAME} u1 ON u1.id=${TICKETS_TABLE_NAME}.user LEFT JOIN ${USERS_TABLE_NAME} u2 ON u2.id=${TICKETS_TABLE_NAME}.updated_by ${adminCheck} ${orderBy} ${orderType} ${limit} ${offset};`;
 
         connection.query(query, (err, row) => {
             if (err) {
@@ -150,17 +150,25 @@ router.put("/", (req, res) => {
     } else res.status(401).send("You have to be logged to edit tickets!");
 });
 //Delete ticket
-router.delete('/:id', (req, res) => {
-    if (req?.session?.role) {
-        connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.params.id} ${req?.session?.role === "Admin" ? `` : `AND user=${req?.session?.userID}`}`, (err, row) => {
-            if (err) res.status(500).send(`There is a problem with connection: ${err.code}`);
-            else if (row.affectedRows > 0) {
-                res.send("You have successfully deleted the ticket!");
-            } else {
-                if (req.session.role === "Admin") res.status(404).send("Ticket doesn't exists!");
-                else res.status(401).send("You can delete only your tickets!");
-            }
-        });
+router.delete('/', async (req, res) => {
+    if (req?.session?.role === "Admin") {
+        if (req.query.jiraID !== "null" && !isNaN(Number(req.query.jiraID))) {
+            await axios.delete(`https://${JIRA_DOMAIN_NAME}/rest/api/3/issue/${Number(req.query.jiraID)}`,{
+                auth:auth
+            })
+            .then(response => {
+                if(response.status===204) res.send("You have successfully deleted the ticket!");
+                else if (response.status===404) res.status(404).send("Ticket doesn't exists!");
+                else res.status(404).send("Problem deleting the ticket!");
+            }).catch(err => console.log(err));
+        } else {
+            connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.query.id}`, (err, row) => {
+                if (err) res.status(500).send(`There is a problem with connection: ${err.code}`);
+                else if (row.affectedRows > 0) {
+                    res.send("You have successfully deleted the ticket!");
+                } else res.status(404).send("Ticket doesn't exists!");
+            });
+        }
     } else res.status(401).send("You don't have permissions to delete tickets!");
 })
 

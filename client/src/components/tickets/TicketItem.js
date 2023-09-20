@@ -19,8 +19,8 @@ function TicketItem(props) {
         if (props.ticket) setTicket(props.ticket);
     }, [props.ticket])
 
-    async function deleteHandler(id) {
-        await ticketsAPI.deleteTicket(id).then(response => {
+    async function deleteHandler(id,jira_id) {
+        await ticketsAPI.deleteTicket(id, jira_id).then(response => {
             setDeleting("deleting");
             console.log(tickets.length);
             setCounter(prev=>({...prev,limit:tickets.length,offset:0,update:prev.update+1}));
@@ -46,7 +46,7 @@ function TicketItem(props) {
                 <td>{ticket.state}</td>
                 <td>{new Date(ticket.createdOn).toLocaleDateString("en-EN", {day:'numeric',month:"numeric",year:'numeric'})}</td>
                 <td className="options">
-                    <MdDelete title="Delete Ticket" onClick={() => deleteHandler(ticket.id)} className='optionButton' />
+                    <MdDelete title="Delete Ticket" onClick={() => deleteHandler(ticket.id, ticket.jira_id)} className='optionButton' />
                     <MdEdit title="Edit Ticket" onClick={() => setSelectedTicket({ ticket, edit: true })} className='optionButton' />
                     <AiOutlineArrowRight title="Show more details" onClick={() => setSelectedTicket({ ticket, edit: false })} id="selectButton" className="optionButton" />
                 </td>

@@ -22,9 +22,9 @@ const ticketsAPI = {
             throw err;
         }
     },
-    deleteTicket: async (ticketID) => {
+    deleteTicket: async (ticketID,jiraID) => {
         try {
-            return await axios.delete(`/tickets/${ticketID}`);
+            return await axios.delete(`/tickets/?id=${ticketID}&jiraID=${jiraID}`);
         } catch (err) {
             throw err;
         }
