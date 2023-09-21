@@ -158,9 +158,10 @@ router.delete('/', async (req, res) => {
             })
             .then(response => {
                 if(response.status===204) res.send("You have successfully deleted the ticket!");
-                else if (response.status===404) res.status(404).send("Ticket doesn't exists!");
+            }).catch(err => {
+                if (err.response.status===404) res.status(404).send("Ticket doesn't exists!");
                 else res.status(404).send("Problem deleting the ticket!");
-            }).catch(err => console.log(err));
+            });
         } else {
             connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.query.id}`, (err, row) => {
                 if (err) res.status(500).send(`There is a problem with connection: ${err.code}`);
