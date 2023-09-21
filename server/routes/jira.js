@@ -5,14 +5,14 @@ require("dotenv").config();
 
 const TICKETS_TABLE_NAME = process.env.DATABASE_TICKETS_TABLE_NAME;
 const transitionsMap = {
-    11: "New",
-    21: "In Progress",
-    31: "Done",
-    2: "Review"
+    "New":11,
+    "In progress":21,
+    "Done":31,
+    "Review":2
 }
 const statusMap = {
     10010: "New",
-    10011: "In Progress",
+    10011: "In progress",
     10012: "Done",
     10013: "Review"
 }

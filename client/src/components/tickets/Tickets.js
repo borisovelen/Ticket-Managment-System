@@ -26,7 +26,7 @@ export default function Tickets() {
                         }
                         setCounter(prev => ({ ...prev, noMore: true }));
                     }
-                    if (!loginStatus) setTickets(response.data);
+                    setTickets(response.data);
                 } else {
                     if (typeof tickets === "string") {
                         setTickets(response.data);

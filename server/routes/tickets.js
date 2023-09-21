@@ -117,16 +117,16 @@ router.post("/", async (req, res) => {
         } else if (newTicket?.shortDesc?.length > SHORT_DESC_MAX_LENGTH) {
             res.status(406).send(`Short Description must be less than ${SHORT_DESC_MAX_LENGTH} characters!`);
         } else {
-            let jiraID=null;
+            let jiraID = null;
             await axios.post(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue`, {
                 fields: {
                     summary: newTicket.shortDesc,
                     description: newTicket.description,
                     project: {
-                        key:JIRA_PROJECT_KEY
+                        key: JIRA_PROJECT_KEY
                     },
-                    issuetype:{
-                        id:10012
+                    issuetype: {
+                        id: 10012
                     },
                     priority: {
                         id: getIdByName(JIRA_PRIORITY_MAP, newTicket.priority)
@@ -134,10 +134,10 @@ router.post("/", async (req, res) => {
                 }
             }, {
                 auth: auth
-            }).then(response=>jiraID=response.data.id)
-            .catch(err=>console.log(err));
+            }).then(response => jiraID = response.data.id)
+                .catch(err => console.log(err));
 
-            connection.query(`INSERT INTO ${TICKETS_TABLE_NAME}(short_desc,description,user,created_on,state,priority,jira_id) VALUES (?,?,?,CURRENT_TIMESTAMP(),"New",?,?);`, [newTicket.shortDesc, newTicket.description, req.session.userID, newTicket.priority,jiraID], (err, row) => {
+            connection.query(`INSERT INTO ${TICKETS_TABLE_NAME}(short_desc,description,user,created_on,state,priority,jira_id) VALUES (?,?,?,CURRENT_TIMESTAMP(),"New",?,?);`, [newTicket.shortDesc, newTicket.description, req.session.userID, newTicket.priority, jiraID], (err, row) => {
                 if (err) console.log(err) && res.status(500).send(`There is a problem with connection: ${err.code}`);
                 else if (row.affectedRows > 0) {
                     res.send("Successfully added!");
@@ -179,13 +179,13 @@ router.put("/", async (req, res) => {
                     else if (err.response.status === 403) error = "You don't have permission to update tickets!";
                     else error = "Unexpected error!";
                 });
-                await axios.post(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue/${updatedTicket.jira_id}/transitions`,{
+                await axios.post(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue/${updatedTicket.jira_id}/transitions`, {
                     transition: {
-                        id: getIdByName(JIRA_STATUS_MAP, updatedTicket.state)
+                        id: Number(JIRA_STATUS_MAP[updatedTicket.state])
                     }
-                },{
+                }, {
                     auth: auth
-                })
+                }).catch(err => console.log(err.response.data));
                 connection.query(`UPDATE ${TICKETS_TABLE_NAME} SET short_desc=?, description=?, updated_by=?, updated_on=CURRENT_TIMESTAMP(), state=?, priority=? WHERE id=?`, [updatedTicket.shortDesc, updatedTicket.description, req.session.userID, updatedTicket.state, updatedTicket.priority, updatedTicket.id], (err, row) => {
                     if (err) error = `There is a problem with connection: ${err.code}`;
                     else if (row.affectedRows === 0) {
@@ -209,10 +209,10 @@ router.delete('/', async (req, res) => {
             await axios.delete(`https://${JIRA_DOMAIN_NAME}/rest/api/3/issue/${Number(req.query.jiraID)}`, {
                 auth: auth
             })
-                .catch(err => {
-                    if (err.response.status === 404) error = "Ticket doesn't exists in Jira!";
-                    else error = "Problem deleting the ticket in Jira!";
-                });
+            .catch(err => {
+                if (err.response.status === 404) error = "Ticket doesn't exists in Jira!";
+                else error = "Problem deleting the ticket in Jira!";
+            });
         }
         connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.query.id}`, (err, row) => {
             if (err) error = `There is a problem with connection: ${err.code}`;
