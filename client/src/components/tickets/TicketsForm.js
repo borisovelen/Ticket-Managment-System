@@ -15,43 +15,46 @@ function TicketsForm() {
     const [longDesc, setLongDesc] = useState("");
     const [state, setState] = useState("New");
     const [priority, setPriority] = useState("Low");
+    const [jiraID, setJiraID] = useState(null);
     const [required, setRequired] = useState(false);
     const { counter, setCounter } = useTicketCounterContext();
 
+    function setDefaultValues() {
+        setID(null);
+        setShortDesc("");
+        setLongDesc("");
+        setState("New");
+        setPriority("Low");
+        setJiraID(null);
+    }
+
     useEffect(() => {
         if (selectedTicket.ticket === "New Ticket") {
-            setID(null);
-            setShortDesc("");
-            setLongDesc("");
-            setState("New");
-            setPriority("Low");
+            setDefaultValues();
         } else if (selectedTicket?.edit) {
             setID(selectedTicket?.ticket?.id);
             setShortDesc(selectedTicket?.ticket?.shortDesc);
             setLongDesc(selectedTicket?.ticket?.description);
             setState(selectedTicket?.ticket?.state);
             setPriority(selectedTicket?.ticket?.priority);
+            setJiraID(selectedTicket?.ticket?.jira_id);
         }
     }, [selectedTicket]);
 
     function clearHandler() {
         if (selectedTicket?.ticket === "New Ticket") {
-            setID(null);
-            setShortDesc("");
-            setLongDesc("");
-            setState("New");
-            setPriority("Low");
+            setDefaultValues();
             setRequired(false);
         } else setSelectedTicket({ ticket: "New Ticket", edit: true });
     }
 
     function ticketsLoader(type) {
-        if (counter.noMore&&type==="add") {
-            setCounter(prev=>({...prev,limit:tickets.length+1,offset:0,update:prev.update+1}));
-        }else if(type==="add"){
-            setCounter(prev=>({...prev,offset:0,update:prev.update+1}));
-        }else if(type==="update"){
-            setCounter(prev=>({...prev,limit:tickets.length,offset:0,update:prev.update+1}));
+        if (counter.noMore && type === "add") {
+            setCounter(prev => ({ ...prev, limit: tickets.length + 1, offset: 0, update: prev.update + 1 }));
+        } else if (type === "add") {
+            setCounter(prev => ({ ...prev, offset: 0, update: prev.update + 1 }));
+        } else if (type === "update") {
+            setCounter(prev => ({ ...prev, limit: tickets.length, offset: 0, update: prev.update + 1 }));
         }
     }
 
@@ -65,8 +68,8 @@ function TicketsForm() {
                 shortDesc: shortDesc,
                 description: longDesc,
                 state: state,
-                priority: priority
-            }).then(async (response) => {
+                priority: priority,
+            }).then((response) => {
                 setError([response.data, "success"]);
                 ticketsLoader("add");
                 clearHandler();
@@ -89,13 +92,14 @@ function TicketsForm() {
                 shortDesc: shortDesc,
                 description: longDesc,
                 state: state,
-                priority: priority
-            }).then(async (response) => {
+                priority: priority,
+                jira_id: jiraID
+            }).then((response) => {
                 setError([response.data, "success"]);
                 ticketsLoader("update");
                 clearHandler();
             }).catch(err => {
-                if (err.response.status === 403 || err.response.status === 401 || err.response.status === 406 || err.response.status === 500) {
+                if (err.response.status === 403 || err.response.status === 401 || err.response.status === 406 || err.response.status === 500 || err.response.status === 400) {
                     setError([err.response?.data, "error"]);
                 } else setError(["You can't update this ticket right now! Contatct system administrator!", "error"]);
             });

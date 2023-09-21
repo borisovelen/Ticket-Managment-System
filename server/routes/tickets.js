@@ -14,6 +14,12 @@ const JIRA_DOMAIN_NAME = process.env.JIRA_DOMAIN_NAME;
 const JIRA_USER = process.env.JIRA_USER;
 const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY;
 const JIRA_API_URL = `https://${JIRA_DOMAIN_NAME}/rest/api/3/search?jql=project=${JIRA_PROJECT_KEY}&maxResults=100`;
+const JIRA_STATUS_MAP = require('./jira').transitionsMap;
+const JIRA_PRIORITY_MAP = require('./jira').priorityMap;
+
+function getIdByName(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+}
 
 const auth = {
     username: JIRA_USER,
@@ -81,12 +87,11 @@ router.get("/", (req, res) => {
 
         const limit = reqLimit ? 'LIMIT ' + reqLimit : '';
         const offset = reqOffset ? 'OFFSET ' + reqOffset : '';
-        const adminCheck = (isAdmin ? `` : `WHERE ${TICKETS_TABLE_NAME}.user=${req?.session?.userID}`);
 
         const orderType = (req.query?.orderType && req.query?.orderType !== "undefined") ? req.query.orderType : "";
         const orderBy = (orderType !== "" && req.query?.orderBy !== "undefiend") ? "ORDER BY " + TICKETS_TABLE_NAME + "." + req.query.orderBy : "";
 
-        const query = `SELECT ${TICKETS_TABLE_NAME}.id, ${TICKETS_TABLE_NAME}.short_desc AS shortDesc, ${TICKETS_TABLE_NAME}.description, u1.fullname AS createdBy, ${TICKETS_TABLE_NAME}.created_on AS createdOn, u2.fullname as updatedBy, ${TICKETS_TABLE_NAME}.updated_on AS updatedOn, ${TICKETS_TABLE_NAME}.state, ${TICKETS_TABLE_NAME}.priority, ${TICKETS_TABLE_NAME}.jira_id FROM ${TICKETS_TABLE_NAME} LEFT JOIN ${USERS_TABLE_NAME} u1 ON u1.id=${TICKETS_TABLE_NAME}.user LEFT JOIN ${USERS_TABLE_NAME} u2 ON u2.id=${TICKETS_TABLE_NAME}.updated_by ${adminCheck} ${orderBy} ${orderType} ${limit} ${offset};`;
+        const query = `SELECT ${TICKETS_TABLE_NAME}.id, ${TICKETS_TABLE_NAME}.short_desc AS shortDesc, ${TICKETS_TABLE_NAME}.description, u1.fullname AS createdBy, ${TICKETS_TABLE_NAME}.created_on AS createdOn, u2.fullname as updatedBy, ${TICKETS_TABLE_NAME}.updated_on AS updatedOn, ${TICKETS_TABLE_NAME}.state, ${TICKETS_TABLE_NAME}.priority, ${TICKETS_TABLE_NAME}.jira_id FROM ${TICKETS_TABLE_NAME} LEFT JOIN ${USERS_TABLE_NAME} u1 ON u1.id=${TICKETS_TABLE_NAME}.user LEFT JOIN ${USERS_TABLE_NAME} u2 ON u2.id=${TICKETS_TABLE_NAME}.updated_by ${orderBy} ${orderType} ${limit} ${offset};`;
 
         connection.query(query, (err, row) => {
             if (err) {
@@ -104,16 +109,36 @@ router.get("/", (req, res) => {
     }
 });
 //Add new ticket
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
     if (req?.session?.role) {
         const newTicket = req.body;
+        console.log(newTicket);
         if (newTicket?.shortDesc?.length === 0) {
             res.status(406).send("Short Description field can't be empty!")
         } else if (newTicket?.shortDesc?.length > SHORT_DESC_MAX_LENGTH) {
             res.status(406).send(`Short Description must be less than ${SHORT_DESC_MAX_LENGTH} characters!`);
-        }
-        else {
-            connection.query(`INSERT INTO ${TICKETS_TABLE_NAME}(short_desc,description,user,created_on,state,priority) VALUES (?,?,?,CURRENT_TIMESTAMP(),"New",?);`, [newTicket.shortDesc, newTicket.description, req.session.userID, newTicket.priority], (err, row) => {
+        } else {
+            let jiraID=null;
+            await axios.post(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue`, {
+                fields: {
+                    summary: newTicket.shortDesc,
+                    description: newTicket.description,
+                    project: {
+                        key:JIRA_PROJECT_KEY
+                    },
+                    issuetype:{
+                        id:10012
+                    },
+                    priority: {
+                        id: getIdByName(JIRA_PRIORITY_MAP, newTicket.priority)
+                    }
+                }
+            }, {
+                auth: auth
+            }).then(response=>jiraID=response.data.id)
+            .catch(err=>console.log(err));
+
+            connection.query(`INSERT INTO ${TICKETS_TABLE_NAME}(short_desc,description,user,created_on,state,priority,jira_id) VALUES (?,?,?,CURRENT_TIMESTAMP(),"New",?,?);`, [newTicket.shortDesc, newTicket.description, req.session.userID, newTicket.priority,jiraID], (err, row) => {
                 if (err) console.log(err) && res.status(500).send(`There is a problem with connection: ${err.code}`);
                 else if (row.affectedRows > 0) {
                     res.send("Successfully added!");
@@ -127,7 +152,8 @@ router.post("/", (req, res) => {
     } else res.status(403).send("You have to be logged in to add new tickets!");
 })
 //Edit ticket
-router.put("/", (req, res) => {
+router.put("/", async (req, res) => {
+    let error = "";
     if (req?.session?.role) {
         const updatedTicket = req.body;
         if (updatedTicket?.shortDesc?.length === 0) {
@@ -135,42 +161,70 @@ router.put("/", (req, res) => {
         } else if (updatedTicket?.shortDesc?.length > SHORT_DESC_MAX_LENGTH) {
             res.status(406).send(`Short Description must be less than ${SHORT_DESC_MAX_LENGTH} characters!`);
         } else {
-            if (req?.session?.role) {
-                connection.query(`UPDATE ${TICKETS_TABLE_NAME} SET short_desc=?, description=?, updated_by=?, updated_on=CURRENT_TIMESTAMP(), state=?, priority=? WHERE id=? ${req?.session?.role === "Admin" ? '' : `AND user=${req.session.userID}`}`, [updatedTicket.shortDesc, updatedTicket.description, req.session.userID, updatedTicket.state, updatedTicket.priority, updatedTicket.id], (err, row) => {
-                    if (err) res.status(500).send(`There is a problem with connection: ${err.code}`);
-                    else if (row.affectedRows > 0) {
-                        res.send("You have successfully updated the ticket!");
-                    } else {
-                        if (req.session.role === "Admin") res.status(403).send("Ticket doesn't exists!");
-                        else res.status(403).send("You can't edit other tickets!");
+            if (updatedTicket.jira_id !== "null" && !isNaN(Number(updatedTicket.jira_id))) {
+                await axios.put(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue/${updatedTicket.jira_id}`, {
+                    fields: {
+                        summary: updatedTicket.shortDesc,
+                        description: updatedTicket.description,
+                        priority: {
+                            id: getIdByName(JIRA_PRIORITY_MAP, updatedTicket.priority)
+                        }
+                    }
+                }, {
+                    auth: auth
+                }).catch(err => {
+                    if (err.response.status === 400) {
+                        console.log(err.response.data);
+                        error = "Issue updated failed!";
+                    }
+                    else if (err.response.status === 403) error = "You don't have permission to update tickets!";
+                    else error = "Unexpected error!";
+                });
+                await axios.post(`https://${JIRA_DOMAIN_NAME}/rest/api/2/issue/${updatedTicket.jira_id}/transitions`,{
+                    transition: {
+                        id: getIdByName(JIRA_STATUS_MAP, updatedTicket.state)
+                    }
+                },{
+                    auth: auth
+                })
+                connection.query(`UPDATE ${TICKETS_TABLE_NAME} SET short_desc=?, description=?, updated_by=?, updated_on=CURRENT_TIMESTAMP(), state=?, priority=? WHERE id=?`, [updatedTicket.shortDesc, updatedTicket.description, req.session.userID, updatedTicket.state, updatedTicket.priority, updatedTicket.id], (err, row) => {
+                    if (err) error = `There is a problem with connection: ${err.code}`;
+                    else if (row.affectedRows === 0) {
+                        error = "Ticket doesn't exists!";
                     }
                 });
+                if (error.length > 0) {
+                    res.status(403).send(error)
+                } else {
+                    res.send("You have successfully updated the ticket!");
+                }
             }
         }
     } else res.status(401).send("You have to be logged to edit tickets!");
 });
 //Delete ticket
 router.delete('/', async (req, res) => {
+    let error = "";
     if (req?.session?.role === "Admin") {
         if (req.query.jiraID !== "null" && !isNaN(Number(req.query.jiraID))) {
-            await axios.delete(`https://${JIRA_DOMAIN_NAME}/rest/api/3/issue/${Number(req.query.jiraID)}`,{
-                auth:auth
+            await axios.delete(`https://${JIRA_DOMAIN_NAME}/rest/api/3/issue/${Number(req.query.jiraID)}`, {
+                auth: auth
             })
-            .then(response => {
-                if(response.status===204) res.send("You have successfully deleted the ticket!");
-            }).catch(err => {
-                if (err.response.status===404) res.status(404).send("Ticket doesn't exists!");
-                else res.status(404).send("Problem deleting the ticket!");
-            });
-        } else {
-            connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.query.id}`, (err, row) => {
-                if (err) res.status(500).send(`There is a problem with connection: ${err.code}`);
-                else if (row.affectedRows > 0) {
-                    res.send("You have successfully deleted the ticket!");
-                } else res.status(404).send("Ticket doesn't exists!");
-            });
+                .catch(err => {
+                    if (err.response.status === 404) error = "Ticket doesn't exists in Jira!";
+                    else error = "Problem deleting the ticket in Jira!";
+                });
         }
+        connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE id=${req.query.id}`, (err, row) => {
+            if (err) error = `There is a problem with connection: ${err.code}`;
+            else if (row.affectedRows === 0) {
+                error = "Ticket doesn't exists!";
+            }
+        });
+        if (error.length > 0) res.status(401).send(error);
+        else res.send("You have successfully deleted the ticket!");
     } else res.status(401).send("You don't have permissions to delete tickets!");
 })
+
 
 module.exports = router;

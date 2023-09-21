@@ -7,7 +7,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const connection = require("./database").dbConnection;
 
 const usersRouter = require("./routes/users");
-const jiraRouter = require("./routes/jira");
+const jiraRouter = require("./routes/jira").router;
 const ticketsRouter = require("./routes/tickets");
 
 

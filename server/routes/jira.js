@@ -4,29 +4,41 @@ const connection = require("../database").dbConnection;
 require("dotenv").config();
 
 const TICKETS_TABLE_NAME = process.env.DATABASE_TICKETS_TABLE_NAME;
+const transitionsMap = {
+    11: "New",
+    21: "In Progress",
+    31: "Done",
+    2: "Review"
+}
 const statusMap = {
     10010: "New",
     10011: "In Progress",
     10012: "Done",
     10013: "Review"
 }
+const priorityMap = {
+    4: "Low",
+    3: "Moderate",
+    2: "High",
+    1: "Critical"
+}
 
 const fetchJira = {
     addIssue: (newIssue) => {
         connection.query(`CALL insertIssue (?,?,?,?,?,?,?);`, [newIssue.id, newIssue.createdOn, newIssue.updatedOn, newIssue.state, newIssue.priority, newIssue.shortDesc, newIssue.description], (err, row) => {
-            if (err) console.log(err);
+            if (err) console.log(err.code);
             else console.log(row[0][0]?.msg);
         })
     },
     updateIssue: (newIssue) => {
         connection.query(`CALL updateIssue (?,?,?,?,?,?,?);`, [newIssue.id, newIssue.createdOn, newIssue.updatedOn, newIssue.state, newIssue.priority, newIssue.shortDesc, newIssue.description], (err, row) => {
-            if (err) console.log(err);
+            if (err) console.log(err.code);
             else console.log(row[0][0]?.msg);
         })
     },
     deleteIssue: (id) => {
         connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE jira_id=?`, [id], (err, row) => {
-            if (err) console.log(err)
+            if (err) console.log(err.code)
             else console.log(`Successfully deleted jira ticket (NO: ${id}) from database!`);
         })
     }
@@ -43,7 +55,7 @@ router.post('/', (req, res) => {
         state: statusMap[Number(issueData.fields.status.id)],
         priority: issueData.fields.priority.name,
         shortDesc: issueData.fields.summary,
-        description: issueData.fields?.description
+        description: issueData.fields.description
     }
     if (type === "jira:issue_created") {
         fetchJira.addIssue(newIssue);
@@ -55,4 +67,7 @@ router.post('/', (req, res) => {
     res.status(200).send("OK");
 });
 
-module.exports = router;
+
+module.exports.router = router;
+module.exports.transitionsMap = transitionsMap;
+module.exports.priorityMap = priorityMap;
