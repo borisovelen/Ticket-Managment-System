@@ -48,13 +48,13 @@
 }
 
 .buttons-container button {
-    background-color: #ff4c30;
+    background-color: #ff2200;
     color: white;
     border: none;
 }
 
 .buttons-container button:hover {
-    background-color: #ff4c30;
+    background-color: #ff2200;
     color: white;
     border: none;
 }

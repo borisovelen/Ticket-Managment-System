@@ -112,7 +112,6 @@ router.get("/", (req, res) => {
 router.post("/", async (req, res) => {
     if (req?.session?.role) {
         const newTicket = req.body;
-        console.log(newTicket);
         if (newTicket?.shortDesc?.length === 0) {
             res.status(406).send("Short Description field can't be empty!")
         } else if (newTicket?.shortDesc?.length > SHORT_DESC_MAX_LENGTH) {
