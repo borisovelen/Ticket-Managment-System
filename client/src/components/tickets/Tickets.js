@@ -20,13 +20,13 @@ export default function Tickets() {
         if (loginStatus) {
             await ticketsAPI.ticketsLoader({ counter }).then(response => {
                 if (typeof response.data === "string") {
-                    if (response.data === "There are no tickets!" || response.data === "You don't have any tickets!") {
+                    // if (response.data === "There are no tickets!" || response.data === "You don't have any tickets!") {
                         if (!Array.isArray(tickets)) {
                             setTickets(response.data);
                         }
                         setCounter(prev => ({ ...prev, noMore: true }));
-                    }
-                    setTickets(response.data);
+                    // }
+                    if(!loginStatus) setTickets(response.data);
                 } else {
                     if (typeof tickets === "string") {
                         setTickets(response.data);

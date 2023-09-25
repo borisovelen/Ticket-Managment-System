@@ -51,6 +51,7 @@
     background-color: #ff2200;
     color: white;
     border: none;
+    border-radius: 0;
 }
 
 .buttons-container button:hover {

@@ -13,7 +13,7 @@ function DeleteProfile() {
     const { setSelectedTicket } = useSelectedTicketContext();
     const { setError } = useErrorContext();
     const [password,setPassword] = useState("");
-    const renderBackdrop = (props) => <div className="backdrop" {...props} />;
+    // const renderBackdrop = (props) => <div className="backdrop" {...props} />;
     const [showModal, setShowModal] = useState(false);
     const [showPassForm,setShowPassForm] = useState(false);
     
@@ -42,7 +42,7 @@ function DeleteProfile() {
     return (
         <>
             <button className='userButton' type='button' onClick={() => setShowModal(true)}>Delete profile</button>
-            <Modal className="hide" show={showModal} onHide={handleClose} backdrop={renderBackdrop}>
+            <Modal className="hide" show={showModal} onHide={handleClose} >
                 <div className="modal">
                     <div className="modal-header">
                         <div className="modal-title">Delete Account</div>

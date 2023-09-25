@@ -27,19 +27,19 @@ const fetchJira = {
     addIssue: (newIssue) => {
         connection.query(`CALL insertIssue (?,?,?,?,?,?,?);`, [newIssue.id, newIssue.createdOn, newIssue.updatedOn, newIssue.state, newIssue.priority, newIssue.shortDesc, newIssue.description], (err, row) => {
             if (err) console.log(err.code);
-            else console.log(row[0][0]?.msg);
+            // else console.log(row[0][0]?.msg);
         })
     },
     updateIssue: (newIssue) => {
         connection.query(`CALL updateIssue (?,?,?,?,?,?,?);`, [newIssue.id, newIssue.createdOn, newIssue.updatedOn, newIssue.state, newIssue.priority, newIssue.shortDesc, newIssue.description], (err, row) => {
             if (err) console.log(err.code);
-            else console.log(row[0][0]?.msg);
+            // else console.log(row[0][0]?.msg);
         })
     },
     deleteIssue: (id) => {
         connection.query(`DELETE FROM ${TICKETS_TABLE_NAME} WHERE jira_id=?`, [id], (err, row) => {
             if (err) console.log(err.code)
-            else console.log(`Successfully deleted jira ticket (NO: ${id}) from database!`);
+            // else console.log(`Successfully deleted jira ticket (NO: ${id}) from database!`);
         })
     }
 }
