@@ -16,7 +16,7 @@ function Header() {
                 <h1>'s Tickets Manager</h1>
             </div>
             <div className='nav'>
-                <p className='navigation' onClick={() => navigate('/')}>Home</p>
+                <p className='navigation' onClick={() => navigate('/')}>Tickets</p>
                 {loginStatus ? <p className='navigation' onClick={() => setSelectedTicket({ ticket: "New Ticket", edit: true })}>Add Ticket</p> : <></>}
                 {loginStatus ? <p className='navigation' onClick={() => navigate('/profile')}>Profile</p> : <></>}
                 {!loginStatus? <p className='navigation' onClick={() => navigate('/register')}>Sign Up</p>:<></>}
