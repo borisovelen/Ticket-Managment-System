@@ -1,8 +1,11 @@
+#STARTING APPLICATION:
+
 start server by: npm run dev
-start react by: npm start
+start client by: npm start
 
+#Use create elen-database.sql to create the database!
 
-.env:
+#make .env file in main folder with the following settings, you have to fill them up:
 
 #SERVER AND TOKEN SETTINGS
 
